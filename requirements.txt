@@ -1,0 +1,5 @@
+python-telegram-bot==22.0
+pyrogram==2.0.106
+SQLAlchemy==2.0.39
+python-dotenv==1.1.0
+tgcrypto==1.2.3  # Solo se necessario
