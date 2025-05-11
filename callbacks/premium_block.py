@@ -2,7 +2,7 @@ import logging
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions, ChatMember
 from telegram.ext import ContextTypes
 from telegram.error import BadRequest
-from database.db_manager import get_db_session, PremiumUser
+from database.db_manager import get_db_session, PremiumUser, is_premium_check_enabled
 from datetime import datetime, timedelta, timezone
 import sys
 import os
@@ -42,6 +42,11 @@ async def check_premium_message(update: Update, context: ContextTypes.DEFAULT_TY
         return
 
     with get_db_session() as session:
+        # Verifica se il controllo premium è attivo
+        if not is_premium_check_enabled(session):
+            logger.info("Controllo premium disattivato, salto il mute.")
+            return
+
         try:
             # Controlla se l'utente è admin/owner
             try:
