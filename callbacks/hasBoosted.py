@@ -1,4 +1,4 @@
-# hasBoosted.py
+# /callbacks/hasBoosted.py
 from telegram import Update, ChatMemberOwner, ChatMemberAdministrator, ChatPermissions
 from telegram.ext import ContextTypes, CallbackQueryHandler
 from telegram.error import BadRequest, RetryAfter
