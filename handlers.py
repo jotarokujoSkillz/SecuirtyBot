@@ -1,6 +1,8 @@
+#handlers.py
 from telegram.ext import CommandHandler, MessageHandler, filters
 from commands.mute_unmute import mute_command, unmute_command
 from commands.warn_ban import warn_command, ban_command, unwarn_command
+from commands.on_off_premium import premium_on_command, premium_off_command
 from utils import welcome_command, handle_system_message
 from antiflood.mediasystem import on_media_message
 from callbacks.hasBoosted import unmute_callback_handler
@@ -40,4 +42,6 @@ def setup_handlers(app):
     app.add_handler(CommandHandler("rwarn", warn_command))
     app.add_handler(CommandHandler("runwarn", unwarn_command))
     app.add_handler(CommandHandler("rban", ban_command))
+    app.add_handler(CommandHandler("premiumOn", premium_on_command))
+    app.add_handler(CommandHandler("premiumOff", premium_off_command))
 
