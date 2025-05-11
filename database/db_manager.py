@@ -1,5 +1,5 @@
-# db_manager.py
-from sqlalchemy import create_engine, Column, Boolean, BigInteger, DateTime, Index
+# /database/db_manager.py
+from sqlalchemy import create_engine, Column, Boolean, BigInteger, DateTime, Index, String
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import inspect
@@ -62,6 +62,16 @@ class PremiumUser(Base):
     def __repr__(self):
         return f"<PremiumUser {self.user_id} Boosted: {self.has_boosted}>"
 
+class Settings(Base):
+    """Tabella per gestire le impostazioni globali del bot"""
+    __tablename__ = "settings"
+    
+    key = Column(String, primary_key=True)
+    value = Column(String, nullable=False)
+
+    def __repr__(self):
+        return f"<Settings {self.key}: {self.value}>"
+
 @contextmanager
 def get_db_session():
     """Fornisce una sessione DB con gestione automatica degli errori"""
@@ -75,6 +85,11 @@ def get_db_session():
         raise
     finally:
         session.close()
+
+def is_premium_check_enabled(session):
+    """Verifica se il controllo premium è attivo"""
+    setting = session.query(Settings).filter(Settings.key == "premium_check").first()
+    return setting and setting.value == "enabled"
 
 def init_db():
     """Inizializzazione database con controlli avanzati"""
@@ -96,6 +111,16 @@ def init_db():
                         """)
             else:
                 logger.info("Struttura database già esistente")
+
+            if not inspector.has_table("settings"):
+                logger.info("Creazione tabella settings...")
+                Base.metadata.create_all(bind=engine)
+                logger.info("Tabella settings creata con successo")
+                
+                # Inserisce il valore di default per il controllo premium
+                with SessionLocal() as session:
+                    session.add(Settings(key="premium_check", value="enabled"))
+                    session.commit()
 
     except SQLAlchemyError as e:
         logger.error(f"Errore inizializzazione DB: {e}")
