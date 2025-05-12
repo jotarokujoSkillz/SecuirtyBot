@@ -1,3 +1,4 @@
+# /antiflood/mediasystem.py
 import logging
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -7,6 +8,7 @@ from datetime import datetime, timezone, timedelta
 last_media_time = {}
 warned_users = {}
 new_users_cooldown = {}  # user_id: join_time
+immune_users = set()  # Set per tracciare gli utenti immuni
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,11 +24,17 @@ async def on_media_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if chat.type not in ("group", "supergroup") or not user:
         return
 
+    user_id = user.id
+
+    # Controlla se l'utente è immune
+    if user_id in immune_users:
+        logger.info(f"Utente {user_id} immune al sistema di cooldown.")
+        return
+
     if not (msg.photo or msg.video or msg.animation or msg.sticker):
         return
 
     now = datetime.now(timezone.utc)
-    user_id = user.id
 
     # Controllo blocco 30 minuti per nuovi utenti
     join_time = new_users_cooldown.get(user_id)
